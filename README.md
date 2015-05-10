@@ -15,6 +15,10 @@ A base formatter for [Toga](http://togajs.github.io) documentation. Provides a h
 ### `new Trifle([options])`
 
 - `options` `{Object}`
+  - `name` `{String}` - Name of plugin. _(Default: `'trifle'`)_
+  - `property` `{RegExp}` - Name of property that contains the AST in Vinyl files. _(Default: `'ast'`)_
+  - `extension` `{RegExp}` - Matches the file extension or extensions which are handled by this parser.
+  - `formatters` `{Array.<Object.<String|RegExp,Function(String)>>}` - A list of node formatters.
 
 Creates a reusable formatter based on the given options.
 
@@ -35,6 +39,25 @@ toga.src('./lib/**/*.js')
     .pipe(new Trifle()) // walks `.ast` and formats nodes
     // ... compiler(s)
     .pipe(toga.dest('./docs'));
+```
+
+### Formatters
+
+```js
+formatters: [
+    {
+        key: 'description',
+        format: function (value) {
+            return String(value).toUpperCase();
+        }
+    },
+    {
+        key: /^(title|method|property)$/,
+        format: function (value, key, node) {
+            return key + ': ' + String(value).toLowerCase();
+        }
+    }
+]
 ```
 
 ## Test

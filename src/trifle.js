@@ -22,7 +22,8 @@ export default class Trifle extends Transform {
 	 * @param {Object} options
 	 * @param {RegExp} options.extension
 	 * @param {String} options.name
-	 * @param {Array.<Object.<String|RegExp,Function(String)>>} options.nodes
+	 * @param {Array.<Object.<String,String|RegExp|Function(String)>>} options.formatters
+	 * @param {String} options.property
 	 */
 	constructor(options = {}) {
 		super({ objectMode: true });
@@ -38,24 +39,24 @@ export default class Trifle extends Transform {
 	 * Checks for and applies the first matching node formatter.
 	 *
 	 * @method handleNode
-	 * @param {Object} walker
+	 * @param {Object} node
 	 * @param {*} value
 	 */
-	handleNode(walker, value) {
-		var walkerKey = walker.key;
+	handleNode(node, value) {
+		var nodeKey = node.key;
 
-		if (value == null || walkerKey == null) {
+		if (value == null || nodeKey == null) {
 			return;
 		}
 
-		this.options.nodes.some(function update(node) {
-			var nodeKey = node.key;
+		this.options.formatters.some(function update(formatter) {
+			var formatterKey = formatter.key;
 
 			if (
-				typeof nodeKey === 'string' && nodeKey === walkerKey
-				|| nodeKey instanceof RegExp && nodeKey.test(walkerKey)
+				typeof formatterKey === 'string' && formatterKey === nodeKey
+				|| formatterKey instanceof RegExp && formatterKey.test(nodeKey)
 			) {
-				walker.update(node.format(value, walkerKey, walker));
+				node.update(formatter.format(value, nodeKey, node));
 				return true;
 			}
 		});
@@ -70,10 +71,11 @@ export default class Trifle extends Transform {
 	_transform(file, enc, cb) {
 		var that = this,
 			options = this.options,
-			extension = options.extension;
+			extension = options.extension,
+			ast = file[options.property];
 
-		if (file.ast && extension.test(file.path)) {
-			traverse(file.ast).forEach(function (value) {
+		if (ast && extension.test(file.path)) {
+			traverse(ast).forEach(function (value) {
 				that.handleNode(this, value);
 			});
 		}
@@ -96,8 +98,8 @@ Trifle.defaults = {
 	/** Matches any file extension. */
 	extension: /.\w+$/,
 
-	/** List of nodes and formatters. */
-	nodes: [],
+	/** List of formatters. */
+	formatters: [],
 
 	/** The name of the property containing an AST. */
 	property: 'ast'

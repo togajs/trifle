@@ -63,7 +63,7 @@ describe('trifle e2e', function () {
 
 		it('should format matching nodes', function (done) {
 			var options = {
-				nodes: [{
+				formatters: [{
 					key: 'description',
 					format(value) {
 						return String(value).toUpperCase();
@@ -76,7 +76,7 @@ describe('trifle e2e', function () {
 
 		it('should not format non-matching nodes', function (done) {
 			var options = {
-				nodes: [{
+				formatters: [{
 					key: /^description$/,
 					format(value) {
 						return String(value).toUpperCase();

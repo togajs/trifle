@@ -1,0 +1,82 @@
+{
+  "type": "Document",
+  "blocks": [
+    {
+      "type": "Code",
+      "contents": ""
+    },
+    {
+      "type": "Comment",
+      "description": "# THE LONG GAME\n\nI'M THE DOCTOR. WELL, THEY CALL ME THE DOCTOR. I DON'T KNOW WHY. I CALL ME\nTHE DOCTOR TOO. I STILL DON'T KNOW WHY. SAVING THE WORLD WITH MEALS ON\nWHEELS. STOP TALKING, BRAIN THINKING. HUSH. *INSISTENTLY* BOW TIES ARE COOL!\nCOME ON AMY, I'M A NORMAL BLOKE, TELL ME WHAT NORMAL BLOKES DO! I'M THE\nDOCTOR. WELL, THEY CALL ME THE DOCTOR. I DON'T KNOW WHY. I CALL ME THE DOCTOR\nTOO. I STILL DON'T KNOW WHY.\n\n## 42\n\nTHEY'RE NOT ALIENS, THEY'RE EARTH...LIENS! DID I MENTION WE HAVE COMFY\nCHAIRS? YOU HIT ME WITH A CRICKET BAT. HEH-HAA! SUPER SQUEAKY BUM TIME!\n\n- FATHER CHRISTMAS. SANTA CLAUS. OR AS I'VE ALWAYS KNOWN HIM: JEFF.\n- THEY'RE NOT ALIENS, THEY'RE EARTH&HELLIP;LIENS!\n- YOU'VE SWALLOWED A PLANET!\n\nTHE WAY I SEE IT, EVERY LIFE IS A PILE OF GOOD THINGS AND BAD THINGS....\nHEY....THE GOOD THINGS DON'T ALWAYS SOFTEN THE BAD THINGS; BUT VICE-VERSA THE\nBAD THINGS DON'T NECESSARILY SPOIL THE GOOD THINGS AND MAKE THEM UNIMPORTANT.\n\n```JS\nVAR FOO = 'BAR';\n\nFUNCTION LOG(VALUE) {\n    CONSOLE.LOG(VALUE);\n}\n\nLOG(FOO); // <- 'BAR'\n```\n\n## GRIDLOCK\n\nYOU HATE ME; YOU WANT TO KILL ME! WELL, GO ON! KILL ME! KILL ME! I'M NOBODY'S\nTAXI SERVICE; I'M NOT GONNA BE THERE TO CATCH YOU EVERY TIME YOU FEEL LIKE\nJUMPING OUT OF A SPACESHIP. YOU KNOW WHEN GROWN-UPS TELL YOU 'EVERYTHING'S\nGOING TO BE FINE' AND YOU THINK THEY'RE PROBABLY LYING TO MAKE YOU FEEL\nBETTER?",
+      "tags": []
+    },
+    {
+      "type": "Code",
+      "contents": "import Foo from 'foo';"
+    },
+    {
+      "type": "Comment",
+      "description": "",
+      "tags": [
+        {
+          "tag": "class",
+          "name": "Bar",
+          "description": "\n"
+        },
+        {
+          "tag": "extends",
+          "name": "Foo"
+        }
+      ]
+    },
+    {
+      "type": "Code",
+      "contents": "export default class Bar extends Foo {"
+    },
+    {
+      "type": "Comment",
+      "description": "",
+      "tags": [
+        {
+          "tag": "constructor",
+          "description": "\n"
+        },
+        {
+          "tag": "param",
+          "type": "{Object}",
+          "name": "options",
+          "description": "OPTIONS FOR THE CLASS."
+        }
+      ]
+    },
+    {
+      "type": "Code",
+      "contents": "\tconstructor(options) {\n\t\tsuper(options);\n\t}"
+    },
+    {
+      "type": "Comment",
+      "description": "",
+      "tags": [
+        {
+          "tag": "method",
+          "name": "log",
+          "description": "\n"
+        },
+        {
+          "tag": "param",
+          "type": "{*}",
+          "name": "value",
+          "description": "\n"
+        },
+        {
+          "tag": "chainable"
+        }
+      ]
+    },
+    {
+      "type": "Code",
+      "contents": "\tlog(value) {\n\t\tconsole.log(value);\n\t\treturn this;\n\t}\n}"
+    }
+  ],
+  "nav": {}
+}

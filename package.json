@@ -21,7 +21,8 @@
     "url": "https://github.com/togajs/trifle"
   },
   "dependencies": {
-    "mtil": "^0.1.3"
+    "mtil": "^0.1.3",
+    "traverse": "^0.6.6"
   },
   "devDependencies": {
     "babel": "^5.2.17",
@@ -32,6 +33,7 @@
     "mocha": "^2.2.4",
     "nodemon": "^1.3.7",
     "stream-array": "^1.1.0",
+    "tunic": "^0.4.0",
     "vinyl-fs": "^1.0.0"
   },
   "scripts": {

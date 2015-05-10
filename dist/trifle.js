@@ -47,7 +47,8 @@ var Trifle = (function (_Transform) {
   * @param {Object} options
   * @param {RegExp} options.extension
   * @param {String} options.name
-  * @param {Array.<Object.<String|RegExp,Function(String)>>} options.nodes
+  * @param {Array.<Object.<String,String|RegExp|Function(String)>>} options.formatters
+  * @param {String} options.property
   */
 
 	function Trifle() {
@@ -73,24 +74,24 @@ var Trifle = (function (_Transform) {
    * Checks for and applies the first matching node formatter.
    *
    * @method handleNode
-   * @param {Object} walker
+   * @param {Object} node
    * @param {*} value
    */
-		value: function handleNode(walker, value) {
-			var walkerKey = walker.key;
+		value: function handleNode(node, value) {
+			var nodeKey = node.key;
 
-			function update(node) {
-				var nodeKey = node.key;
-
-				if (typeof nodeKey === 'string' && nodeKey === walkerKey || nodeKey instanceof RegExp && nodeKey.test(walkerKey)) {
-					walker.update(node.format(value, walkerKey));
-					return true;
-				}
+			if (value == null || nodeKey == null) {
+				return;
 			}
 
-			this.options.nodes.some(update);
+			this.options.formatters.some(function update(formatter) {
+				var formatterKey = formatter.key;
 
-			return this;
+				if (typeof formatterKey === 'string' && formatterKey === nodeKey || formatterKey instanceof RegExp && formatterKey.test(nodeKey)) {
+					node.update(formatter.format(value, nodeKey, node));
+					return true;
+				}
+			});
 		}
 	}, {
 		key: '_transform',
@@ -104,10 +105,11 @@ var Trifle = (function (_Transform) {
 		value: function _transform(file, enc, cb) {
 			var that = this,
 			    options = this.options,
-			    extension = options.extension;
+			    extension = options.extension,
+			    ast = file[options.property];
 
-			if (file.ast && extension.test(file.path)) {
-				_traverse2['default'](file.ast).forEach(function (value) {
+			if (ast && extension.test(file.path)) {
+				_traverse2['default'](ast).forEach(function (value) {
 					that.handleNode(this, value);
 				});
 			}
@@ -135,7 +137,10 @@ Trifle.defaults = {
 	/** Matches any file extension. */
 	extension: /.\w+$/,
 
-	/** List of nodes and formatters. */
-	nodes: []
+	/** List of formatters. */
+	formatters: [],
+
+	/** The name of the property containing an AST. */
+	property: 'ast'
 };
 module.exports = exports['default'];

@@ -36,6 +36,17 @@ export default class Trifle extends Transform {
 	}
 
 	/**
+	 * @method add
+	 * @param {Array.<Function(Object,String):Boolean>} formatter
+	 * @chainable
+	 */
+	add(formatter) {
+		this.options.formatters.push(formatter);
+
+		return this;
+	}
+
+	/**
 	 * @method _transform
 	 * @param {String} file
 	 * @param {String} enc
@@ -43,8 +54,8 @@ export default class Trifle extends Transform {
 	 */
 	_transform(file, enc, cb) {
 		var options = this.options,
-			extension = options.extension,
 			formatters = options.formatters,
+			extension = options.extension,
 			ast = file[options.property];
 
 		if (ast && extension.test(file.path)) {

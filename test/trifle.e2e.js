@@ -62,33 +62,29 @@ describe('trifle e2e', function () {
 		}
 
 		it('should format matching nodes', function (done) {
-			var options = {
-				formatters: [
-					function (node, value) {
-						if (node.key === 'description' && value != null) {
-							node.update(String(value).toUpperCase());
-							return false;
-						}
-					}
-				]
-			};
+			var stream = new Trifle();
 
-			testWithFile('match.js', new Trifle(options), done);
+			stream.add(function (node, value) {
+				if (node.key === 'description' && value != null) {
+					node.update(String(value).toUpperCase());
+					return false;
+				}
+			});
+
+			testWithFile('match.js', stream, done);
 		});
 
 		it('should not format non-matching nodes', function (done) {
-			var options = {
-				formatters: [
-					function (node, value) {
-						if ((/^description$/).test(node.key)) {
-							node.update(String(value).toUpperCase());
-							return false;
-						}
-					}
-				]
-			};
+			var stream = new Trifle();
 
-			testWithFile('nomatch.js', new Trifle(options), done);
+			stream.add(function (node, value) {
+				if ((/^description$/).test(node.key)) {
+					node.update(String(value).toUpperCase());
+					return false;
+				}
+			});
+
+			testWithFile('nomatch.js', stream, done);
 		});
 	});
 });

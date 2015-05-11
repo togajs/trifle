@@ -68,6 +68,19 @@ var Trifle = (function (_Transform) {
 	_inherits(Trifle, _Transform);
 
 	_createClass(Trifle, [{
+		key: 'add',
+
+		/**
+   * @method add
+   * @param {Array.<Function(Object,String):Boolean>} formatter
+   * @chainable
+   */
+		value: function add(formatter) {
+			this.options.formatters.push(formatter);
+
+			return this;
+		}
+	}, {
 		key: '_transform',
 
 		/**
@@ -78,8 +91,8 @@ var Trifle = (function (_Transform) {
    */
 		value: function _transform(file, enc, cb) {
 			var options = this.options,
-			    extension = options.extension,
 			    formatters = options.formatters,
+			    extension = options.extension,
 			    ast = file[options.property];
 
 			if (ast && extension.test(file.path)) {

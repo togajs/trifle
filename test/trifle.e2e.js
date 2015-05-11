@@ -63,12 +63,14 @@ describe('trifle e2e', function () {
 
 		it('should format matching nodes', function (done) {
 			var options = {
-				formatters: [{
-					key: 'description',
-					format(value) {
-						return String(value).toUpperCase();
+				formatters: [
+					function (node, value) {
+						if (node.key === 'description' && value != null) {
+							node.update(String(value).toUpperCase());
+							return false;
+						}
 					}
-				}]
+				]
 			};
 
 			testWithFile('match.js', new Trifle(options), done);
@@ -76,12 +78,14 @@ describe('trifle e2e', function () {
 
 		it('should not format non-matching nodes', function (done) {
 			var options = {
-				formatters: [{
-					key: /^description$/,
-					format(value) {
-						return String(value).toUpperCase();
+				formatters: [
+					function (node, value) {
+						if ((/^description$/).test(node.key)) {
+							node.update(String(value).toUpperCase());
+							return false;
+						}
 					}
-				}]
+				]
 			};
 
 			testWithFile('nomatch.js', new Trifle(options), done);

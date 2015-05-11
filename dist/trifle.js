@@ -47,7 +47,7 @@ var Trifle = (function (_Transform) {
   * @param {Object} options
   * @param {RegExp} options.extension
   * @param {String} options.name
-  * @param {Array.<Object.<String,String|RegExp|Function(String)>>} options.formatters
+  * @param {Array.<Function(Object,String):Boolean>} options.formatters
   * @param {String} options.property
   */
 
@@ -68,32 +68,6 @@ var Trifle = (function (_Transform) {
 	_inherits(Trifle, _Transform);
 
 	_createClass(Trifle, [{
-		key: 'handleNode',
-
-		/**
-   * Checks for and applies the first matching node formatter.
-   *
-   * @method handleNode
-   * @param {Object} node
-   * @param {*} value
-   */
-		value: function handleNode(node, value) {
-			var nodeKey = node.key;
-
-			if (value == null || nodeKey == null) {
-				return;
-			}
-
-			this.options.formatters.some(function update(formatter) {
-				var formatterKey = formatter.key;
-
-				if (typeof formatterKey === 'string' && formatterKey === nodeKey || formatterKey instanceof RegExp && formatterKey.test(nodeKey)) {
-					node.update(formatter.format(value, nodeKey, node));
-					return true;
-				}
-			});
-		}
-	}, {
 		key: '_transform',
 
 		/**
@@ -103,14 +77,20 @@ var Trifle = (function (_Transform) {
    * @param {Function} cb
    */
 		value: function _transform(file, enc, cb) {
-			var that = this,
-			    options = this.options,
+			var options = this.options,
 			    extension = options.extension,
+			    formatters = options.formatters,
 			    ast = file[options.property];
 
 			if (ast && extension.test(file.path)) {
 				_traverse2['default'](ast).forEach(function (value) {
-					that.handleNode(this, value);
+					var node = this;
+
+					// Apply formatters to each node
+					formatters.some(function (formatter) {
+						// break loop when formatter returns false
+						return formatter(node, value) === false;
+					});
 				});
 			}
 

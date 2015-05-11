@@ -18,7 +18,7 @@ A base formatter for [Toga](http://togajs.github.io) documentation. Provides a h
   - `name` `{String}` - Name of plugin. _(Default: `'trifle'`)_
   - `property` `{RegExp}` - Name of property that contains the AST in Vinyl files. _(Default: `'ast'`)_
   - `extension` `{RegExp}` - Matches the file extension or extensions which are handled by this parser.
-  - `formatters` `{Array.<Object.<String|RegExp,Function(String)>>}` - A list of node formatters.
+  - `formatters` `{Array.<Function(Object,String):Boolean>}` - A list of node formatters.
 
 Creates a reusable formatter based on the given options.
 
@@ -43,18 +43,19 @@ toga.src('./lib/**/*.js')
 
 ### Formatters
 
+Formatters are functions that accept a [traverse node context](https://github.com/substack/js-traverse#context) and a value. They will be executed in order for each node in the AST. You can keep subsequent formatters from executing by returning `false`.
+
 ```js
 formatters: [
-    {
-        key: 'description',
-        format: function (value) {
-            return String(value).toUpperCase();
+    function (node, value) {
+        if (node.key === 'description' && value != null) {
+            node.update(String(value).toUpperCase());
+            return false; // don't apply other formatters to this node
         }
     },
-    {
-        key: /^(title|method|property)$/,
-        format: function (value, key, node) {
-            return key + ': ' + String(value).toLowerCase();
+    function (node, value) {
+        if ((/^(title|method|property)$/).test(node.key)) {
+            node.update(node.key + ': ' + String(value).toLowerCase());
         }
     }
 ]

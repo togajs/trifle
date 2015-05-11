@@ -22,6 +22,20 @@ A base formatter for [Toga](http://togajs.github.io) documentation. Provides a h
 
 Creates a reusable formatter based on the given options.
 
+### `#add(formatter) : this`
+
+- `formatter` `{Function(Object,*):Boolean}` - Formatter to add.
+
+Adds a formatter to be used.
+
+```js
+.add(function (node, value) {
+    if ((/^(title|method|property)$/).test(node.key)) {
+        node.update(node.key + ': ' + String(value).toLowerCase());
+    }
+})
+```
+
 ### `#pipe(stream) : Stream.Readable`
 
 - `stream` `{Writable}` - Writable stream.

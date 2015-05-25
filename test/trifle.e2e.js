@@ -5,7 +5,7 @@ import Tunic from 'tunic';
 import expect from 'expect';
 import streamArray from 'stream-array';
 import supply from 'mtil/function/supply';
-import vinylFs from 'vinyl-fs';
+import toga from 'toga';
 import { join } from 'path';
 import { readFileSync } from 'fs';
 
@@ -52,7 +52,7 @@ describe('trifle e2e', function () {
 				expect(actual).toEqual(String(readFileSync(expected)));
 			}
 
-			vinylFs
+			toga
 				.src(fixture)
 				.pipe(new Tunic())
 				.pipe(stream)

@@ -8,7 +8,6 @@
  * @name trifle
  */
 
-import mixin from 'mtil/object/mixin';
 import traverse from 'traverse';
 import { Transform } from 'stream';
 
@@ -18,6 +17,31 @@ import { Transform } from 'stream';
  */
 export default class Trifle extends Transform {
 	/**
+	 * @property {Object} options
+	 */
+	options = null;
+
+	/**
+	 * Default options.
+	 *
+	 * @property {Object} defaults
+	 * @static
+	 */
+	static defaults = {
+		/** The name of this plugin. */
+		name: 'trifle',
+
+		/** Matches any file extension. */
+		extension: /.\w+$/,
+
+		/** List of formatters. */
+		formatters: [],
+
+		/** The name of the property containing an AST. */
+		property: 'ast'
+	};
+
+	/**
 	 * @constructor
 	 * @param {Object} options
 	 * @param {RegExp} options.extension
@@ -25,23 +49,35 @@ export default class Trifle extends Transform {
 	 * @param {Array.<Function(Object,String):Boolean>} options.formatters
 	 * @param {String} options.property
 	 */
-	constructor(options = {}) {
+	constructor(options) {
 		super({ objectMode: true });
 
-		/**
-		 * @property options
-		 * @type {Object}
-		 */
-		this.options = mixin({}, Trifle.defaults, options);
+		this.options = { ...Trifle.defaults, ...options };
 	}
 
 	/**
 	 * @method add
-	 * @param {Array.<Function(Object,String):Boolean>} formatter
+	 * @param {Function(Object,String):Boolean} formatter
 	 * @chainable
 	 */
 	add(formatter) {
 		this.options.formatters.push(formatter);
+
+		return this;
+	}
+
+	/**
+	 * @method remove
+	 * @param {Function(Object,String):Boolean} formatter
+	 * @chainable
+	 */
+	remove(formatter) {
+		var formatters = this.options.formatters,
+			index = formatters.indexOf(formatter);
+
+		if (index > -1) {
+			formatters.splice(index, 1);
+		}
 
 		return this;
 	}
@@ -53,44 +89,22 @@ export default class Trifle extends Transform {
 	 * @param {Function} cb
 	 */
 	_transform(file, enc, cb) {
-		var options = this.options,
-			formatters = options.formatters,
-			extension = options.extension,
-			ast = file[options.property];
+		var { extension, formatters, property } = this.options;
 
-		if (ast && extension.test(file.path)) {
-			traverse(ast).forEach(function (value) {
-				var node = this;
-
-				// Apply formatters to each node
-				formatters.some(function (formatter) {
-					// break loop when formatter returns false
-					return formatter(node, value) === false;
-				});
-			});
+		if (!file || file.isAsset || !extension.test(file.path)) {
+			return cb(null, file);
 		}
+
+		traverse(file[property]).forEach(function (value) {
+			var node = this;
+
+			// Apply formatters to each node
+			formatters.some(function (formatter) {
+				// break loop when formatter returns false
+				return formatter(node, value) === false;
+			});
+		});
 
 		cb(null, file);
 	}
 }
-
-/**
- * Default options.
- *
- * @property defaults
- * @type {Object.<String,RegExp>}
- * @static
- */
-Trifle.defaults = {
-	/** The name of this plugin. */
-	name: 'trifle',
-
-	/** Matches any file extension. */
-	extension: /.\w+$/,
-
-	/** List of formatters. */
-	formatters: [],
-
-	/** The name of the property containing an AST. */
-	property: 'ast'
-};

@@ -1,7 +1,7 @@
 /*eslint-env mocha */
 
-import Trifle from '../src/trifle';
-import expect from 'expect';
+var Trifle = require('../src/trifle'),
+	expect = require('expect');
 
 describe('trifle spec', function () {
 	it('should create an instance', function () {

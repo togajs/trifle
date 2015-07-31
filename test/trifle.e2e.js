@@ -1,90 +1,80 @@
-/*eslint-env mocha */
+/* eslint-env mocha */
 
-var Trifle = require('../src/trifle'),
-	Tunic = require('tunic'),
-	expect = require('expect'),
-	streamArray = require('stream-array'),
-	supply = require('mtil/function/supply'),
-	toga = require('toga'),
-	join = require('path').join,
-	readFileSync = require('fs').readFileSync,
+import Trifle from '../src/trifle';
+import Tunic from 'tunic';
+import expect from 'expect';
+import toga from 'toga';
+import { join } from 'path';
+import { readFileSync } from 'fs';
 
-	config = {
-		fixtures: join(__dirname, 'fixtures'),
-		expected: join(__dirname, 'expected'),
-		actual: join(__dirname, 'actual')
-	};
+var config = {
+	fixtures: join(__dirname, 'fixtures'),
+	expected: join(__dirname, 'expected'),
+	actual: join(__dirname, 'actual')
+};
 
 describe('trifle e2e', function () {
-	describe('raw streams', function () {
-		function testWithArray(array, stream, done) {
-			var expectChunk = supply(
-				function (chunk) {
-					expect(chunk).toEqual('hello');
-				},
-				function (chunk) {
-					expect(chunk).toEqual('world');
-				}
-			);
+	function testWithFile(filename, stream, done) {
+		var fixture = join(config.fixtures, filename),
+			expected = join(config.expected, filename + '.json');
 
-			streamArray(array)
-				.pipe(stream)
-				.on('data', expectChunk)
-				.on('error', done)
-				.on('end', done);
+		function expectFile(file) {
+			var actual = JSON.stringify(file.docAst, null, 2) + '\n';
+
+			expect(actual).toEqual(String(readFileSync(expected)));
+			// file.contents = new Buffer(actual);
 		}
 
-		it('should not parse non-files', function (done) {
-			var strings = ['hello', 'world'];
+		toga
+			.src(fixture)
+			.pipe(new Tunic())
+			.pipe(stream)
+			.on('data', expectFile)
+			// .pipe(toga.dest(config.actual))
+			.on('error', done)
+			.on('end', done);
+	}
 
-			testWithArray(strings, new Trifle(), done);
+	it('should format matching nodes', function (done) {
+		var stream = new Trifle();
+
+		stream.add(function (node, value) {
+			if (node.key === 'description' && value != null) {
+				node.update(String(value).toUpperCase());
+				return false;
+			}
 		});
+
+		testWithFile('match.js', stream, done);
 	});
 
-	describe('object streams', function () {
-		function testWithFile(filename, stream, done) {
-			var fixture = join(config.fixtures, filename),
-				expected = join(config.expected, filename + '.json');
+	it('should not format non-matching nodes', function (done) {
+		var stream = new Trifle();
 
-			function expectFile(file) {
-				var actual = JSON.stringify(file.ast, null, 2) + '\n';
-
-				expect(actual).toEqual(String(readFileSync(expected)));
+		stream.add(function (node, value) {
+			if ((/^description$/).test(node.key)) {
+				node.update(String(value).toUpperCase());
+				return false;
 			}
+		});
 
-			toga
-				.src(fixture)
-				.pipe(new Tunic())
-				.pipe(stream)
-				.on('data', expectFile)
-				.on('error', done)
-				.on('end', done);
+		testWithFile('nomatch.js', stream, done);
+	});
+
+	it('should ignore unknown files', function (done) {
+		var stream = new Trifle({
+			extension: /\.js$/
+		});
+
+		function expectFile(file) {
+			expect(file.docAst).toBe(undefined);
 		}
 
-		it('should format matching nodes', function (done) {
-			var stream = new Trifle();
-
-			stream.add(function (node, value) {
-				if (node.key === 'description' && value != null) {
-					node.update(String(value).toUpperCase());
-					return false;
-				}
-			});
-
-			testWithFile('match.js', stream, done);
-		});
-
-		it('should not format non-matching nodes', function (done) {
-			var stream = new Trifle();
-
-			stream.add(function (node, value) {
-				if ((/^description$/).test(node.key)) {
-					node.update(String(value).toUpperCase());
-					return false;
-				}
-			});
-
-			testWithFile('nomatch.js', stream, done);
-		});
+		toga
+			.src(join(config.fixtures, 'unused.coffee'))
+			.pipe(stream)
+			.on('data', expectFile)
+			.on('error', done)
+			.on('end', done);
 	});
 });

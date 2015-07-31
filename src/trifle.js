@@ -28,31 +28,31 @@ export default class Trifle extends Transform {
 	 * @static
 	 */
 	static defaults = {
-		/** The name of this plugin. */
-		name: 'trifle',
+		/** The name of the property containing a documentation AST. */
+		property: 'docAst',
 
 		/** Matches any file extension. */
 		extension: /.\w+$/,
 
 		/** List of formatters. */
-		formatters: [],
-
-		/** The name of the property containing an AST. */
-		property: 'ast'
+		formatters: []
 	};
 
 	/**
 	 * @constructor
 	 * @param {Object} options
-	 * @param {RegExp} options.extension
-	 * @param {String} options.name
-	 * @param {Array.<Function(Object,String):Boolean>} options.formatters
-	 * @param {String} options.property
 	 */
 	constructor(options) {
 		super({ objectMode: true });
 
-		this.options = { ...Trifle.defaults, ...options };
+		var { defaults } = Trifle,
+			formatters = defaults.formatters.slice();
+
+		this.options = {
+			...defaults,
+			formatters,
+			...options
+		};
 	}
 
 	/**
@@ -61,7 +61,12 @@ export default class Trifle extends Transform {
 	 * @chainable
 	 */
 	add(formatter) {
-		this.options.formatters.push(formatter);
+		if (typeof formatter !== 'function') {
+			return this;
+		}
+
+		this.options.formatters
+			.push(formatter);
 
 		return this;
 	}
@@ -72,7 +77,11 @@ export default class Trifle extends Transform {
 	 * @chainable
 	 */
 	remove(formatter) {
-		var formatters = this.options.formatters,
+		if (typeof formatter !== 'function') {
+			return this;
+		}
+
+		var { formatters } = this.options,
 			index = formatters.indexOf(formatter);
 
 		if (index > -1) {
@@ -83,19 +92,20 @@ export default class Trifle extends Transform {
 	}
 
 	/**
-	 * @method _transform
-	 * @param {String} file
-	 * @param {String} enc
-	 * @param {Function} cb
+	 * Destructively formats an AST tree. Returns tree as a convenience.
+	 *
+	 * @method format
+	 * @param {Object} ast
+	 * @return {Object} Formatted AST.
 	 */
-	_transform(file, enc, cb) {
-		var { extension, formatters, property } = this.options;
-
-		if (!file || file.isAsset || !extension.test(file.path)) {
-			return cb(null, file);
+	format(ast) {
+		if (ast == null || typeof ast !== 'object') {
+			return ast;
 		}
 
-		traverse(file[property]).forEach(function (value) {
+		var { formatters } = this.options;
+
+		traverse(ast).forEach(function (value) {
 			var node = this;
 
 			// Apply formatters to each node
@@ -105,6 +115,26 @@ export default class Trifle extends Transform {
 			});
 		});
 
-		cb(null, file);
+		return ast;
+	}
+
+	/**
+	 * @method _transform
+	 * @param {String} file
+	 * @param {String} encoding
+	 * @param {Function} next
+	 */
+	_transform(file, encoding, next) {
+		var { extension, property } = this.options;
+
+		if (!file || file.isAsset || !extension.test(file.path)) {
+			this.push(file);
+			return next();
+		}
+
+		this.format(file[property]);
+
+		this.push(file);
+		next();
 	}
 }

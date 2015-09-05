@@ -24,7 +24,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'd
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var _traverse = require('traverse');
 
@@ -59,13 +59,13 @@ var Trifle = (function (_Transform) {
 			/** List of formatters. */
 			formatters: []
 		},
+
+		/**
+   * @constructor
+   * @param {Object} options
+   */
 		enumerable: true
 	}]);
-
-	/**
-  * @constructor
-  * @param {Object} options
-  */
 
 	function Trifle(options) {
 		_classCallCheck(this, Trifle);
@@ -73,38 +73,48 @@ var Trifle = (function (_Transform) {
 		_get(Object.getPrototypeOf(Trifle.prototype), 'constructor', this).call(this, { objectMode: true });
 
 		this.options = null;
-		var defaults = Trifle.defaults,
-		    formatters = defaults.formatters.slice();
+		var defaults = Trifle.defaults;
+		var formatters = defaults.formatters.slice();
 
 		this.options = _extends({}, defaults, {
 			formatters: formatters
 		}, options);
 	}
 
+	/**
+  * @method add
+  * @param {Function(Object,String):Boolean} formatter
+  * @chainable
+  */
+
 	_createClass(Trifle, [{
 		key: 'add',
-
-		/**
-   * @method add
-   * @param {Function(Object,String):Boolean} formatter
-   * @chainable
-   */
 		value: function add(formatter) {
+			if (typeof formatter !== 'function') {
+				return this;
+			}
+
 			this.options.formatters.push(formatter);
 
 			return this;
 		}
-	}, {
-		key: 'remove',
 
 		/**
    * @method remove
    * @param {Function(Object,String):Boolean} formatter
    * @chainable
    */
+	}, {
+		key: 'remove',
 		value: function remove(formatter) {
+			if (typeof formatter !== 'function') {
+				return this;
+			}
+
 			var formatters = this.options.formatters;
 			var index = formatters.indexOf(formatter);
+
+			console.log('index', index);
 
 			if (index > -1) {
 				formatters.splice(index, 1);
@@ -112,8 +122,6 @@ var Trifle = (function (_Transform) {
 
 			return this;
 		}
-	}, {
-		key: 'format',
 
 		/**
    * Destructively formats an AST tree. Returns tree as a convenience.
@@ -122,7 +130,13 @@ var Trifle = (function (_Transform) {
    * @param {Object} ast
    * @return {Object} Formatted AST.
    */
+	}, {
+		key: 'format',
 		value: function format(ast) {
+			if (ast == null || typeof ast !== 'object') {
+				return ast;
+			}
+
 			var formatters = this.options.formatters;
 
 			(0, _traverse2['default'])(ast).forEach(function (value) {
@@ -137,8 +151,6 @@ var Trifle = (function (_Transform) {
 
 			return ast;
 		}
-	}, {
-		key: '_transform',
 
 		/**
    * @method _transform
@@ -146,6 +158,8 @@ var Trifle = (function (_Transform) {
    * @param {String} encoding
    * @param {Function} next
    */
+	}, {
+		key: '_transform',
 		value: function _transform(file, encoding, next) {
 			var _options = this.options;
 			var extension = _options.extension;

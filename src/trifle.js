@@ -84,6 +84,8 @@ export default class Trifle extends Transform {
 		var { formatters } = this.options,
 			index = formatters.indexOf(formatter);
 
+		console.log('index', index);
+
 		if (index > -1) {
 			formatters.splice(index, 1);
 		}

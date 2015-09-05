@@ -50,6 +50,7 @@ describe('trifle spec', function () {
 	describe('#remove', function () {
 		it('should ignore non-function values', function () {
 			function foo() {}
+			function bar() {}
 
 			trifle
 				.add(foo)
@@ -57,7 +58,8 @@ describe('trifle spec', function () {
 				.remove(null)
 				.remove('hi')
 				.remove(1234)
-				.remove(true);
+				.remove(true)
+				.remove(bar);
 
 			expect(trifle.options.formatters).toEqual([
 				foo

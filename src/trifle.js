@@ -84,8 +84,6 @@ export default class Trifle extends Transform {
 		var { formatters } = this.options,
 			index = formatters.indexOf(formatter);
 
-		console.log('index', index);
-
 		if (index > -1) {
 			formatters.splice(index, 1);
 		}
@@ -98,9 +96,10 @@ export default class Trifle extends Transform {
 	 *
 	 * @method format
 	 * @param {Object} ast
+	 * @param {Vinyl} file
 	 * @return {Object} Formatted AST.
 	 */
-	format(ast) {
+	format(ast, file) {
 		if (ast == null || typeof ast !== 'object') {
 			return ast;
 		}
@@ -113,7 +112,7 @@ export default class Trifle extends Transform {
 			// Apply formatters to each node
 			formatters.some(function (formatter) {
 				// break loop when formatter returns false
-				return formatter(node, value) === false;
+				return formatter(node, value, ast, file) === false;
 			});
 		});
 
@@ -134,7 +133,7 @@ export default class Trifle extends Transform {
 			return next();
 		}
 
-		this.format(file[property]);
+		this.format(file[property], file);
 
 		this.push(file);
 		next();
